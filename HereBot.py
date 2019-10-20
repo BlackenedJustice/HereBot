@@ -42,18 +42,18 @@ class VkBot:
         peer_id = event.obj.peer_id
         from_id = event.obj.from_id
         if event.from_user:
-            logging.info('welcome to {}'.format(from_id))
+            logging.info('welcome to vk.com/id{}'.format(from_id))
             self.send_message(peer_id, WELCOME_MSG)
         elif event.from_chat:
             try:
                 if '@channel' in text:
-                    logging.info('channel from {}'.format(from_id))
+                    logging.info('channel from vk.com/id{}'.format(from_id))
                     self.channel(peer_id, text, event.obj.from_id)
                 elif '@here' in text:
-                    logging.info('here from {}'.format(from_id))
+                    logging.info('here from vk.com/id{}'.format(from_id))
                     self.here(peer_id, text, event.obj.from_id)
                 elif '/ping' in text:
-                    logging.info('ping from {}'.format(from_id))
+                    logging.info('ping from vk.com/id{}'.format(from_id))
                     self.send_message(peer_id, 'pong')
             except vk_api.exceptions.ApiError:
                 logging.error('No access')
