@@ -68,9 +68,12 @@ class VkBot:
         profiles = self.get_conversation_members(peer_id)
         text = []
         for profile in profiles:
-            if profile['id'] == from_id:
-                continue
-            text.append('@' + profile['screen_name'] + ' (_)')
+            try:
+                if profile['id'] == from_id:
+                    continue
+                text.append('@' + profile['screen_name'] + ' (_)')
+            except KeyError:
+                logging.info(profile)
         self.send_message(peer_id, useful + '\n' + ''.join(text[:self.PACK_SIZE]))
         for i in range(1, len(text) // self.PACK_SIZE + 1):
             self.send_message(peer_id, ''.join(text[i * self.PACK_SIZE:(i + 1) * self.PACK_SIZE]))
