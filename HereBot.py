@@ -6,7 +6,7 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 WELCOME_MSG = 'Бот создан Профкомом ВМК МГУ. Автор - Журихин Юрий\n' \
               'Чтобы начать использование - добавьте меня в беседу и выдайте права администратора\n' \
               '@channel - упоминает всех людей в беседе\n' \
-              '@here - упоминает тех, кто online'
+              '@here - упоминает тех, кто online\nv2.1'
 
 
 class VkBot:
@@ -17,7 +17,7 @@ class VkBot:
         self.group_id = '187762497'
         self.vk_session = vk_api.VkApi(token=self.token)
         self.vk = self.vk_session.get_api()
-        self.PACK_SIZE = 50
+        self.PACK_SIZE = 50  # Size for users to ping in one message
         logging.info('Connected!')
 
     def get_long_poll(self):
@@ -52,11 +52,14 @@ class VkBot:
                 elif '@here' in text:
                     logging.info('here from vk.com/id{}'.format(from_id))
                     self.here(peer_id, text, event.obj.from_id)
+                elif '@vote' in text:
+                    logging.info('vote from vk.com/id{}'.format(from_id))
+                    self.vote(event.obj)
                 elif '/ping' in text:
                     logging.info('ping from vk.com/id{}'.format(from_id))
                     self.send_message(peer_id, 'pong')
-            except vk_api.exceptions.ApiError:
-                logging.error('No access')
+            except vk_api.exceptions.ApiError as e:
+                logging.error(str(e))
 
     def channel(self, peer_id, text, from_id):
         if '[id457265466|@channel]' in text:
@@ -93,6 +96,28 @@ class VkBot:
             if profile['online'] == 1 and profile['id'] != from_id:
                 text.append('@' + profile['screen_name'] + ' (_)')
         self.send_message(peer_id, useful + '\n' + ''.join(text))
+
+    def vote(self, message):
+        profiles = self.get_conversation_members(message.peer_id)
+        poll = None
+        for fwd in message.fwd_messages:
+            if poll is not None:
+                break
+            if fwd['attachments'] is not None:
+                for att in fwd['attachments']:
+                    if att['type'] == 'poll':
+                        poll = att['poll']
+                        break
+        if poll is None:
+            logging.error("Can't find poll in the message: \n{}\nfrom: vk.vom/id{}".format(message, message.from_id))
+            return
+        answers = [ans['id'] for ans in poll['answers']]
+        voters = self.vk.polls.getVoters(owner_id=poll['owner_id'], poll_id=poll['id'], answer_ids=answers)
+        users = set()
+        for ans in voters:
+            for usr in ans['users']:
+                users.add(usr['id'])
+        print(users)
 
     def start(self):
         logging.info('Starting...')
