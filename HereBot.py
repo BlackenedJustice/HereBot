@@ -1,12 +1,13 @@
 import vk_api
 import random
 import logging
+import os
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 WELCOME_MSG = 'Бот создан Профкомом ВМК МГУ. Автор - Журихин Юрий\n' \
               'Чтобы начать использование - добавьте меня в беседу и выдайте права администратора\n' \
               '@channel - упоминает всех людей в беседе\n' \
-              '@here - упоминает тех, кто online\nv2.1'
+              '@here - упоминает тех, кто online\nv2.1.1'
 
 
 class VkBot:
@@ -45,6 +46,8 @@ class VkBot:
             logging.info('welcome to vk.com/id{}'.format(from_id))
             self.send_message(peer_id, WELCOME_MSG)
         elif event.from_chat:
+            if 'SPY' in os.environ:
+               logging.info('msg: {}'.format(text))
             try:
                 if '@channel' in text:
                     logging.info('channel from vk.com/id{}'.format(from_id))
@@ -130,5 +133,6 @@ class VkBot:
             logging.info('Stopping...')
 
 
+print(os.environ['SPY'])
 bot = VkBot()
 bot.start()
