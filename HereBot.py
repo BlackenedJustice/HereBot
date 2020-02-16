@@ -14,6 +14,7 @@ class VkBot:
     def __init__(self):
         logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(funcName)s - %(message)s')
         logging.info('Connecting...')
+        self.spy = False
         self.token = 'b61977fd0b6bba38c20499bb2f0ac170db03130740645a1dd9eded9916e5c46e593ada03ec1876c801561'
         self.group_id = '187762497'
         self.vk_session = vk_api.VkApi(token=self.token)
@@ -46,7 +47,7 @@ class VkBot:
             logging.info('welcome to vk.com/id{}'.format(from_id))
             self.send_message(peer_id, WELCOME_MSG)
         elif event.from_chat:
-            if 'SPY' in os.environ:
+            if self.spy:
                logging.info('msg: {}'.format(text))
             try:
                 if '@channel' in text:
@@ -132,7 +133,8 @@ class VkBot:
         except KeyboardInterrupt:
             logging.info('Stopping...')
 
-
-print(os.environ['SPY'])
 bot = VkBot()
+if 'SPY' in os.environ:
+    bot.spy = True
+    print('Spy mode activated')
 bot.start()
